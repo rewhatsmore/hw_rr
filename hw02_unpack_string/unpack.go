@@ -22,19 +22,17 @@ func Unpack(s string) (string, error) {
 		}
 
 		if r == '\\' {
-			if unicode.IsDigit(str[i+1]) || str[i+1] == '\\' {
-				r = str[i+1]
-				i++
-			} else {
+			if i == len(str)-1 || !unicode.IsDigit(str[i+1]) && str[i+1] != '\\' {
 				return "", ErrInvalidString
 			}
+			r = str[i+1]
+			i++
 		}
 
+		n = 1
 		if i != len(str)-1 && unicode.IsDigit(str[i+1]) {
-			n = int(str[i+1] - 48)
+			n = int(str[i+1] - '0') // subtract '0' from the source rune to get an int32 digit ('9'-'0' == 9)
 			i++
-		} else {
-			n = 1
 		}
 
 		b.WriteString(strings.Repeat(string(r), n))
