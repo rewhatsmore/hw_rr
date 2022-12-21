@@ -6,9 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Change to true if needed.
-var taskWithAsteriskIsCompleted = false
-
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
 	ступеньки собственным затылком:  бум-бум-бум.  Другого  способа
@@ -44,13 +41,14 @@ var text = `Как видите, он  спускается  по  лестни�
 		В этот вечер...`
 
 func TestTop10(t *testing.T) {
-	t.Run("no words in empty string", func(t *testing.T) {
-		require.Len(t, Top10(""), 0)
-	})
-
-	t.Run("positive test", func(t *testing.T) {
-		if taskWithAsteriskIsCompleted {
-			expected := []string{
+	cases := []struct {
+		name, input string
+		expected    []string
+	}{
+		{
+			name:  "test1 long read",
+			input: text,
+			expected: []string{
 				"а",         // 8
 				"он",        // 8
 				"и",         // 6
@@ -61,22 +59,56 @@ func TestTop10(t *testing.T) {
 				"если",      // 4
 				"кристофер", // 4
 				"не",        // 4
-			}
-			require.Equal(t, expected, Top10(text))
-		} else {
-			expected := []string{
-				"он",        // 8
-				"а",         // 6
-				"и",         // 6
-				"ты",        // 5
-				"что",       // 5
-				"-",         // 4
-				"Кристофер", // 4
-				"если",      // 4
-				"не",        // 4
-				"то",        // 4
-			}
-			require.Equal(t, expected, Top10(text))
-		}
+			},
+		}, {
+			name:  "test2 punctuation marks",
+			input: "cat-dog dog cat's - 'one' one, and! -and two? man",
+			expected: []string{
+				"and",     // 2
+				"one",     // 2
+				"cat's",   // 1
+				"cat-dog", // 1
+				"dog",     // 1
+				"man",     // 1
+				"two",     // 1
+			},
+		}, {
+			name:  "test3 one word input",
+			input: "cat",
+			expected: []string{
+				"cat", // 1
+			},
+		}, {
+			name:  "test4 one word repeat",
+			input: "Cat cat cat, cat cat cat, cat cat cat, cat cat!",
+			expected: []string{
+				"cat", // 11
+			},
+		}, {
+			name:  "test5 same frequency",
+			input: "e c d a b",
+			expected: []string{
+				"a", // 1
+				"b", // 1
+				"c", // 1
+				"d", // 1
+				"e", // 1
+			},
+		}, {
+			name:     "test6 digits",
+			input:    "123.65 79 23.12.2022",
+			expected: []string{},
+		},
+	}
+	t.Run("no words in empty string", func(t *testing.T) {
+		require.Len(t, Top10(""), 0)
 	})
+
+	for i := range cases {
+		tc := cases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			got := Top10(tc.input)
+			require.Equal(t, tc.expected, got)
+		})
+	}
 }
