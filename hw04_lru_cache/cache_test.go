@@ -80,7 +80,6 @@ func TestCache(t *testing.T) {
 		val, ok = c.Get("ddd")
 		require.Nil(t, val)
 		require.False(t, ok)
-
 	})
 }
 
