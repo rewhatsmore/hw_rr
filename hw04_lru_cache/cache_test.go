@@ -63,7 +63,7 @@ func TestCache(t *testing.T) {
 		c.Get("ccc")      // [ccc:300 ddd:400 bbb:200]
 		c.Get("bbb")      // [bbb:200 ccc:300 ddd:400]
 		c.Set("ddd", 500) // [ddd:500 bbb:200 ccc:300]
-		c.Set("aaa", 100) // [aaa:100 ddd:500 bbb:200]
+		c.Set("aaa", 150) // [aaa:150 ddd:500 bbb:200]
 		val, ok = c.Get("ccc")
 		require.Nil(t, val)
 		require.False(t, ok)
