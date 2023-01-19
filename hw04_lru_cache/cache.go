@@ -30,15 +30,14 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 		return ok
 	}
 
-	li := l.queue.PushFront(cacheItem{key: key, value: value})
-	l.items[key] = li
-
-	if l.queue.Len() > l.capacity {
+	if l.queue.Len() == l.capacity {
 		cItem := l.queue.Back().Value.(cacheItem)
 		delete(l.items, cItem.key)
 		l.queue.Remove(l.queue.Back())
 	}
 
+	li := l.queue.PushFront(cacheItem{key: key, value: value})
+	l.items[key] = li
 	return false
 }
 
@@ -61,9 +60,7 @@ func (l *lruCache) Clear() {
 	l.m.Lock()
 	defer l.m.Unlock()
 	l.items = make(map[Key]*ListItem, l.capacity)
-	for i := l.queue.Len(); i > 0; i-- {
-		l.queue.Remove(l.queue.Front())
-	}
+	l.queue = NewList()
 }
 
 type cacheItem struct {
