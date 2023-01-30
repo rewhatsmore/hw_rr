@@ -5,12 +5,18 @@ import (
 	"sync"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var (
+	ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+	ErrNoASingleGoroutine  = errors.New("the number of goroutines to execute tasks <= 0")
+)
 
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) (err error) {
+	if n <= 0 {
+		return ErrNoASingleGoroutine
+	}
 	taskChan := make(chan Task)
 	errChan := make(chan error)
 	quitChan := make(chan struct{})
