@@ -44,7 +44,7 @@ func Run(tasks []Task, n, m int) (err error) {
 		}
 	}()
 
-	for range errChan {
+	for _ = range errChan {
 		errCount++
 		if errCount == m {
 			close(quitChan)
