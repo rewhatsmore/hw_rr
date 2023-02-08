@@ -67,4 +67,37 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+
+	cases := []struct {
+		name             string
+		m, n, tasksCount int
+		expectedErr      error
+	}{
+		{"if M == 0, than all mistakes ignored", 0, 5, 50, nil},
+		{"if M < 0, than all mistakes ignored", -2, 5, 50, nil},
+		{"n > len(tasks)", 0, 30, 10, nil},
+		{"len(tasks) = 0", 0, 30, 0, nil},
+		{"n <= 0", 0, 0, 10, ErrNoASingleGoroutine},
+	}
+
+	for i := range cases {
+		tc := cases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			tasks := make([]Task, 0, tc.tasksCount)
+			var runTasksCount int32
+
+			for i := 0; i < tc.tasksCount; i++ {
+				err := fmt.Errorf("error from task %d", i)
+
+				tasks = append(tasks, func() error {
+					time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
+					atomic.AddInt32(&runTasksCount, 1)
+					return err
+				})
+			}
+
+			err := Run(tasks, tc.n, tc.m)
+			require.Equal(t, tc.expectedErr, err)
+		})
+	}
 }
